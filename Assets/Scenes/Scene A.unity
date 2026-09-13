@@ -119,6 +119,90 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &22694433
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 22694435}
+  - component: {fileID: 22694434}
+  m_Layer: 0
+  m_Name: MxPlcConveyorTwinBridge
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &22694434
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 22694433}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f37ad2ae5d23f04cbfaaa543a81faf0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MPS.MxPlcConveyorTwinBridge
+  logicalStationNumber: 0
+  pollIntervalUs: 1000
+  cpuCore: -1
+  connectOnStart: 1
+  yStartDevice: Y20
+  xStartDevice: X0
+  yDeviceCount: 1
+  xDeviceCount: 1
+  y20ConveyorMotorOn: 0
+  x0ObjectDetected: 0
+  startButton: 0
+  isConnected: 0
+  conveyor: {fileID: 299430672}
+  proximitySensor: {fileID: 229314225}
+  objectSpawnPoint: {fileID: 203115331}
+  fallingObjectPrefab: {fileID: 261862238849029247, guid: 4bf01a32cff1f874daf07d0f9d549001, type: 3}
+  fallbackSpawnParent: {fileID: 8284820292986484661}
+  dashboard: {fileID: 1823253802}
+  mqttPublisher: {fileID: 1745141624}
+  lineId: line1
+  source: unity-a-mx-plc
+  mode: mx-plc
+  temperatureC: 28
+  vibrationMmS: 0.2
+  currentA: 0.1
+  rpm: 0
+  runningTemperatureC: 42
+  runningVibrationMmS: 1.2
+  runningCurrentA: 3.1
+  runningRpm: 1420
+  warningTemperatureC: 65
+  alarmTemperatureC: 80
+  warningVibrationMmS: 3.5
+  alarmVibrationMmS: 6
+  warningCurrentA: 4.5
+  alarmCurrentA: 7
+  measurementFollowSpeed: 2.5
+  motorRotationAxis: {x: 0, y: 0, z: 1}
+  motorRotationScale: 0.06
+  rotateMotorOnlyWhenMotorOn: 1
+--- !u!4 &22694435
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 22694433}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -2.22756, y: -0, z: 1.44004}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &97827340
 GameObject:
   m_ObjectHideFlags: 0
@@ -2570,7 +2654,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 924555969}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 73c5969f4e63e1a4bb6794d8f4e33d95, type: 3}
   m_Name: 
@@ -3836,6 +3920,7 @@ GameObject:
   - component: {fileID: 1468441258}
   - component: {fileID: 1468441257}
   - component: {fileID: 1468441256}
+  - component: {fileID: 1468441259}
   m_Layer: 5
   m_Name: StartButton
   m_TagString: Untagged
@@ -3918,7 +4003,7 @@ MonoBehaviour:
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
-        m_CallState: 2
+        m_CallState: 0
 --- !u!114 &1468441257
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3957,6 +4042,51 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1468441254}
   m_CullTransparentMesh: 1
+--- !u!114 &1468441259
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1468441254}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.EventSystems.EventTrigger
+  m_Delegates:
+  - eventID: 2
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 22694434}
+          m_TargetAssemblyTypeName: MPS.MxPlcConveyorTwinBridge, Assembly-CSharp
+          m_MethodName: PressStartButton
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+  - eventID: 3
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 22694434}
+          m_TargetAssemblyTypeName: MPS.MxPlcConveyorTwinBridge, Assembly-CSharp
+          m_MethodName: ReleaseStartButton
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
 --- !u!1 &1535513520
 GameObject:
   m_ObjectHideFlags: 0
@@ -15757,3 +15887,4 @@ SceneRoots:
   - {fileID: 924555971}
   - {fileID: 1745141625}
   - {fileID: 6061904251538177609}
+  - {fileID: 22694435}

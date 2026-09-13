@@ -63,6 +63,7 @@ namespace MPS
     {
         public bool Y20;
         public bool X0;
+        public bool X10;
         public int D100;
         public int D110;
         public int D120;
