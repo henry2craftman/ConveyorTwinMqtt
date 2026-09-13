@@ -1,0 +1,1114 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>컨베이어 디지털 트윈 MQTT 3일 강의 프레젠테이션</title>
+  <style>
+    :root {
+      --ink: #17212b;
+      --muted: #607080;
+      --line: #d8e1e8;
+      --paper: #f6f8fa;
+      --panel: #ffffff;
+      --blue: #2f6fed;
+      --mint: #1b998b;
+      --violet: #7256d9;
+      --amber: #b7791f;
+      --red: #c53030;
+      --soft-blue: #eaf1ff;
+      --soft-mint: #e7f6f3;
+      --soft-violet: #f1ecff;
+      --soft-amber: #fff6df;
+      --soft-red: #fff0f0;
+      --code: #111827;
+      --shadow: 0 16px 36px rgba(23, 33, 43, 0.10);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: "Segoe UI", "Malgun Gothic", Arial, sans-serif;
+      line-height: 1.55;
+    }
+
+    .deck {
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: 1fr auto;
+    }
+
+    .slides {
+      position: relative;
+      min-height: calc(100vh - 70px);
+      padding: 28px;
+    }
+
+    .slide {
+      display: none;
+      width: min(1180px, 100%);
+      min-height: calc(100vh - 126px);
+      margin: 0 auto;
+      padding: 46px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .slide.active {
+      display: block;
+    }
+
+    .title-slide {
+      display: none;
+      place-content: center;
+      background:
+        linear-gradient(135deg, rgba(47, 111, 237, 0.13), rgba(27, 153, 139, 0.13), rgba(114, 86, 217, 0.11)),
+        #ffffff;
+    }
+
+    .title-slide.active {
+      display: grid;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0;
+      line-height: 1.22;
+      letter-spacing: 0;
+    }
+
+    h1 {
+      max-width: 940px;
+      font-size: 54px;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+      font-size: 38px;
+    }
+
+    h3 {
+      margin: 22px 0 10px;
+      font-size: 22px;
+    }
+
+    p {
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: 18px;
+    }
+
+    ul,
+    ol {
+      margin: 12px 0 0;
+      padding-left: 24px;
+      font-size: 20px;
+    }
+
+    li {
+      margin: 8px 0;
+    }
+
+    code {
+      padding: 2px 6px;
+      border-radius: 5px;
+      background: #eef3f7;
+      color: #11263a;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 0.92em;
+    }
+
+    pre {
+      margin: 16px 0 0;
+      padding: 17px;
+      overflow: auto;
+      border-radius: 8px;
+      background: var(--code);
+      color: #edf7ff;
+      font-size: 17px;
+      line-height: 1.48;
+    }
+
+    pre code {
+      padding: 0;
+      color: inherit;
+      background: transparent;
+    }
+
+    table {
+      width: 100%;
+      margin-top: 14px;
+      border-collapse: collapse;
+      font-size: 17px;
+    }
+
+    th,
+    td {
+      padding: 11px 13px;
+      border: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: #f0f5f8;
+      font-weight: 800;
+    }
+
+    .eyebrow {
+      margin: 0 0 12px;
+      color: var(--mint);
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .lead {
+      max-width: 860px;
+      color: #40505f;
+      font-size: 23px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .card {
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+    }
+
+    .card h3 {
+      margin-top: 0;
+    }
+
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 22px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 32px;
+      padding: 5px 11px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #ffffff;
+      color: var(--muted);
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 22px;
+    }
+
+    .flow-node {
+      min-height: 130px;
+      padding: 18px;
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+    }
+
+    .flow-node strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 21px;
+    }
+
+    .flow-node span {
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .plc {
+      border-color: var(--blue);
+      background: var(--soft-blue);
+    }
+
+    .unity {
+      border-color: var(--mint);
+      background: var(--soft-mint);
+    }
+
+    .mqtt {
+      border-color: var(--violet);
+      background: var(--soft-violet);
+    }
+
+    .warn {
+      border-color: var(--amber);
+      background: var(--soft-amber);
+    }
+
+    .danger {
+      border-color: var(--red);
+      background: var(--soft-red);
+    }
+
+    .callout {
+      margin-top: 18px;
+      padding: 16px 18px;
+      border-left: 5px solid var(--blue);
+      border-radius: 8px;
+      background: var(--soft-blue);
+      color: var(--ink);
+      font-size: 18px;
+    }
+
+    .callout strong {
+      color: var(--ink);
+    }
+
+    .task-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .task {
+      display: grid;
+      grid-template-columns: 34px minmax(0, 1fr);
+      gap: 12px;
+      align-items: start;
+      padding: 13px 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+      font-size: 18px;
+    }
+
+    .num {
+      display: grid;
+      place-items: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--mint);
+      color: white;
+      font-weight: 800;
+    }
+
+    .note {
+      margin-top: 20px;
+      padding: 14px 16px;
+      border: 1px dashed #9eb0bf;
+      border-radius: 8px;
+      color: #40505f;
+      background: #fbfcfd;
+      font-size: 16px;
+    }
+
+    .two-column-list {
+      columns: 2;
+      column-gap: 36px;
+    }
+
+    .controls {
+      position: sticky;
+      bottom: 0;
+      display: grid;
+      grid-template-columns: auto 1fr auto auto;
+      gap: 10px;
+      align-items: center;
+      padding: 12px 18px;
+      border-top: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(8px);
+    }
+
+    button {
+      min-height: 42px;
+      padding: 8px 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+      color: var(--ink);
+      cursor: pointer;
+      font: inherit;
+      font-weight: 800;
+    }
+
+    button.primary {
+      border-color: var(--blue);
+      background: var(--blue);
+      color: #ffffff;
+    }
+
+    .progress {
+      height: 10px;
+      border-radius: 999px;
+      background: #e4ebf1;
+      overflow: hidden;
+    }
+
+    .bar {
+      width: 0;
+      height: 100%;
+      background: linear-gradient(90deg, var(--blue), var(--mint));
+    }
+
+    .counter {
+      min-width: 78px;
+      color: var(--muted);
+      font-weight: 800;
+      text-align: right;
+    }
+
+    @media (max-width: 980px) {
+      .slide {
+        padding: 30px;
+      }
+
+      h1 {
+        font-size: 40px;
+      }
+
+      h2 {
+        font-size: 30px;
+      }
+
+      .grid-2,
+      .grid-3,
+      .flow {
+        grid-template-columns: 1fr;
+      }
+
+      .two-column-list {
+        columns: 1;
+      }
+    }
+
+    @media print {
+      body {
+        background: #ffffff;
+      }
+
+      .deck {
+        display: block;
+      }
+
+      .slides {
+        padding: 0;
+      }
+
+      .slide,
+      .title-slide {
+        display: block !important;
+        min-height: auto;
+        margin: 0 0 20px;
+        padding: 24px;
+        border: 1px solid var(--line);
+        box-shadow: none;
+        break-inside: avoid;
+      }
+
+      .controls {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="deck">
+    <main class="slides">
+      <section class="slide title-slide active">
+        <div>
+          <p class="eyebrow">PLC 없이 시작하는 산업 디지털 트윈 XR 실습</p>
+          <h1>컨베이어 디지털 트윈: Unity A - MQTT - Unity B</h1>
+          <p class="lead">
+            Start 버튼, 물체 낙하, 근접센서, 컨베이어, RPM/온도/진동/전류 대시보드를 통해
+            PLC의 X/Y 개념과 MQTT 기반 원격 미러링을 3일 동안 완성합니다.
+          </p>
+          <div class="chip-row">
+            <span class="chip">Mock PLC</span>
+            <span class="chip">Y20 출력</span>
+            <span class="chip">X0 입력</span>
+            <span class="chip">MQTT Pub/Sub</span>
+            <span class="chip">Fault Injection</span>
+            <span class="chip">Checkpoint 복구</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide">
+        <p class="eyebrow">학습 목표</p>
+        <h2>교육생이 마지막에 할 수 있어야 하는 것</h2>
+        <div class="grid-2">
+          <div class="card">
+            <h3>지식 목표</h3>
+            <ul>
+              <li>PLC의 입력 <code>X</code>, 출력 <code>Y</code>, 워드 데이터 <code>D</code>를 구분한다.</li>
+              <li>Unity 메인 스레드와 MQTT 수신 콜백을 분리해야 하는 이유를 설명한다.</li>
+              <li>Raw 디바이스 값을 의미 기반 JSON으로 바꾸는 이유를 말할 수 있다.</li>
+              <li>통신 두절, 값 불일치, 이상 수치가 왜 위험한지 이해한다.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>실습 목표</h3>
+            <ul>
+              <li>Scene A에서 Start 버튼으로 물체를 떨어뜨린다.</li>
+              <li>근접센서 감지로 <code>X0</code>를 만들고, Mock PLC가 <code>Y20</code>을 켜게 한다.</li>
+              <li>Scene A가 MQTT로 상태를 발행한다.</li>
+              <li>Scene B가 MQTT를 구독해 컨베이어와 대시보드를 동기화한다.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="callout">
+          <strong>강의 중심 질문:</strong> 이 신호는 어디서 생겼고, 어떤 이름으로 바뀌며, 최종적으로 무엇을 움직이는가?
+        </div>
+      </section>
+
+      <section class="slide">
+        <p class="eyebrow">전체 구조</p>
+        <h2>실제 설비가 없어도 PLC 구조처럼 가르친다</h2>
+        <div class="flow">
+          <div class="flow-node unity">
+            <strong>Unity A</strong>
+            <span>Start 버튼, 물체 낙하, 센서 Trigger, Mock PLC</span>
+          </div>
+          <div class="flow-node plc">
+            <strong>Mock PLC</strong>
+            <span>X0 감지 입력을 보고 Y20 컨베이어 출력을 결정</span>
+          </div>
+          <div class="flow-node unity">
+            <strong>Publisher</strong>
+            <span>ConveyorTwinMessage를 JSON으로 직렬화</span>
+          </div>
+          <div class="flow-node mqtt">
+            <strong>MQTT Broker</strong>
+            <span>factory/line1/conveyor/state topic 중계</span>
+          </div>
+          <div class="flow-node unity">
+            <strong>Unity B</strong>
+            <span>Subscriber, 대시보드, 원격 컨베이어 미러링</span>
+          </div>
+        </div>
+        <pre><code>Start Button
+→ Spawn Object
+→ Proximity Sensor detects object
+→ X0 = true
+→ Mock PLC sets Y20 = true
+→ conveyorMotorOn = true
+→ MQTT publish
+→ Unity B mirrors state</code></pre>
+      </section>
+
+      <section class="slide">
+        <p class="eyebrow">Device Map</p>
+        <h2>교육용 최소 PLC 맵</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>주소</th>
+              <th>태그명</th>
+              <th>타입</th>
+              <th>의미</th>
+              <th>Unity 표현</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>Y20</code></td>
+              <td><code>conveyorMotorOn</code></td>
+              <td>bool</td>
+              <td>PLC 출력, 컨베이어 모터 ON/OFF</td>
+              <td>컨베이어 이동, 로터 회전</td>
+            </tr>
+            <tr>
+              <td><code>X0</code></td>
+              <td><code>objectDetected</code></td>
+              <td>bool</td>
+              <td>PLC 입력, 근접센서 감지</td>
+              <td>센서 램프, 감지 상태 표시</td>
+            </tr>
+            <tr>
+              <td><code>D100</code></td>
+              <td><code>temperatureC</code></td>
+              <td>number</td>
+              <td>온도</td>
+              <td>온도 Text, 게이지 색상</td>
+            </tr>
+            <tr>
+              <td><code>D110</code></td>
+              <td><code>vibrationMmS</code></td>
+              <td>number</td>
+              <td>진동</td>
+              <td>진동 Text, 게이지 색상</td>
+            </tr>
+            <tr>
+              <td><code>D120</code></td>
+              <td><code>currentA</code></td>
+              <td>number</td>
+              <td>전류</td>
+              <td>전류 Text, 게이지 색상</td>
+            </tr>
+            <tr>
+              <td><code>D130</code></td>
+              <td><code>rpm</code></td>
+              <td>number</td>
+              <td>모터 회전수</td>
+              <td>로터 회전 속도, RPM Text</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="callout">
+          <strong>핵심 구분:</strong> <code>X0</code>는 센서가 PLC에 알려주는 입력이고, <code>Y20</code>은 PLC가 설비로 내보내는 출력입니다.
+        </div>
+      </section>
+
+      <section class="slide">
+        <p class="eyebrow">우리 코드</p>
+        <h2>스크립트 역할 한눈에 보기</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>파일</th>
+              <th>붙이는 위치</th>
+              <th>역할</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>UnityAConveyorMockController.cs</code></td>
+              <td>Scene A</td>
+              <td>Start 버튼, 물체 생성, Mock PLC, 계측값 생성, 대시보드 갱신</td>
+            </tr>
+            <tr>
+              <td><code>ConveyorProximitySensor.cs</code></td>
+              <td>Scene A 센서 Trigger</td>
+              <td>물체 진입 시 <code>X0 objectDetected</code> 생성</td>
+            </tr>
+            <tr>
+              <td><code>ConveyorMqttPublisher.cs</code></td>
+              <td>Scene A</td>
+              <td>상태 JSON을 MQTT로 발행</td>
+            </tr>
+            <tr>
+              <td><code>ConveyorMqttSubscriber.cs</code></td>
+              <td>Scene B</td>
+              <td>MQTT 수신, Queue 저장, Unity 메인 스레드에서 적용</td>
+            </tr>
+            <tr>
+              <td><code>ConveyorDashboard.cs</code></td>
+              <td>Scene A/B Canvas</td>
+              <td>Text, Lamp, Filled Image 게이지 표시</td>
+            </tr>
+            <tr>
+              <td><code>MqttLiteClient.cs</code></td>
+              <td>직접 부착 안 함</td>
+              <td>교육용 MQTT 3.1.1 QoS 0 클라이언트</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="slide">
+        <p class="eyebrow">Scene A 세팅</p>
+        <h2>현장 Twin: 물체를 떨어뜨리고 MQTT로 보낸다</h2>
+        <div class="grid-2">
+          <div>
+            <h3>GameObject 구성</h3>
+            <pre><code>Scene A
+├─ Conveyor
+├─ MotorRotor
+├─ SpawnPoint
+├─ ProximitySensor
+│  ├─ Collider Is Trigger
+│  ├─ Sensor
+│  └─ ConveyorProximitySensor
+├─ UnityA_ConveyorMock
+│  └─ UnityAConveyorMockController
+├─ MQTT_Publisher
+│  └─ ConveyorMqttPublisher
+└─ Dashboard
+   └─ ConveyorDashboard</code></pre>
+          </div>
+          <div>
+            <h3>Inspector 연결</h3>
+            <ul>
+              <li><code>Conveyor</code>: 컨베이어 컴포넌트</li>
+              <li><code>Proximity Sensor</code>: 센서 시각화용 <code>Sensor</code></li>
+              <li><code>Object Spawn Point</code>: 물체 낙하 시작 위치</li>
+              <li><code>Falling Object Prefab</code>: 떨어질 제품 Prefab</li>
+              <li><code>Motor Rotor</code>: 회전할 롤러 또는 모터축 Transform</li>
+              <li><code>Dashboard</code>: Scene A 대시보드</li>
+              <li><code>Mqtt Publisher</code>: 같은 씬의 Publisher</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide">
+        <p class="eyebrow">Scene A 실습</p>
+        <h2>Start 버튼에서 Y20 출력까지</h2>
+        <div class="task-list">
+          <div class="task"><span class="num">1</span><span>UI Button의 <code>OnClick()</code>에 <code>PressStartButton()</code>을 연결한다.</span></div>
+          <div class="task"><span class="num">2</span><span>Play 후 Start 버튼을 눌러 물체가 공중에서 생성되는지 확인한다.</span></div>
+          <div class="task"><span class="num">3</span><span>물체가 Trigger에 닿으면 <code>x0ObjectDetected</code>가 켜지는지 본다.</span></div>
+          <div class="task"><span class="num">4</span><span>Mock PLC가 <code>y20ConveyorMotorOn</code>을 켜고 컨베이어와 로터가 움직이는지 확인한다.</span></div>
+          <div class="task"><span class="num">5</span><span>대시보드의 RPM, 온도, 진동, 전류 fill 색상이 값에 따라 바뀌는지 확인한다.</span></div>
+        </div>
+        <div class="callout">
+          <strong>교육 포인트:</strong> 센서가 컨베이어를 직접 켜지 않습니다. 센서 입력 <code>X0</code>를 보고 Mock PLC가 출력 <code>Y20</code>을 결정합니다.
+        </div>
+      </section>
+
+      <section class="slide">
+        <p class="eyebrow">MQTT 메시지</p>
+        <h2>Unity B가 이해하는 상태 JSON</h2>
+        <pre><code>{
+  "schema": "factory.conveyor.state.v1",
+  "lineId": "line1",
+  "source": "unity-a-mock",
+  "mode": "mock",
+  "timestamp": "2026-09-16T10:30:00+09:00",
+  "quality": "good",
+  "connected": true,
+  "state": {
+    "startButton": false,
+    "objectDetected": true,
+    "conveyorMotorOn": true
+  },
+  "measurements": {
+    "temperatureC": 41.8,
+    "vibrationMmS": 1.2,
+    "currentA": 3.1,
+    "rpm": 1420
+  },
+  "status": {
+    "level": "normal",
+    "message": "Conveyor running normally"
+  }
+}</code></pre>
+        <div class="callout">
+          <strong>Topic:</strong> <code>factory/line1/conveyor/state</code>
+        </div>
+      </section>
+
+      <section class="slide">
+        <p class="eyebrow">Scene B 세팅</p>
+        <h2>원격 Viewer: MQTT를 받아 같은 상태를 재현한다</h2>
+        <div class="grid-2">
+          <div>
+            <h3>GameObject 구성</h3>
+            <pre><code>Scene B
+├─ Conveyor
+├─ MotorRotor
+├─ SensorVisual
+│  └─ Sensor
+├─ MQTT_Subscriber
+│  └─ ConveyorMqttSubscriber
+└─ Dashboard
+   └─ ConveyorDashboard</code></pre>
+          </div>
+          <div>
+            <h3>Inspector 연결</h3>
+            <ul>
+              <li><code>Broker Host</code>: 같은 PC면 <code>127.0.0.1</code>, 다른 PC면 A PC 또는 Broker IP</li>
+              <li><code>State Topic</code>: <code>factory/line1/conveyor/state</code></li>
+              <li><code>Conveyor</code>: 원격 컨베이어</li>
+              <li><code>Motor Rotor</code>: 원격 롤러 또는 모터축</li>
+              <li><code>Proximity Sensor</code>: 원격 센서 시각화</li>
+              <li><code>Dashboard</code>: 원격 대시보드</li>
+            </ul>
+          </div>
+        </div>
+        <div class="note">구독 로그만 뜨고 값이 안 바뀌면 아직 발행자가 메시지를 보내지 않은 상태입니다.</div>
+      </section>
+
+      <section class="slide">
+        <p class="eyebrow">스레드 안전</p>
+        <h2>MQTT 콜백에서 Unity 오브젝트를 바로 건드리지 않는다</h2>
+        <div class="grid-2">
+          <div class="card">
+            <h3>문제 상황</h3>
+            <pre><code>// 위험한 예
+void OnMqttMessageReceived(...)
+{
+    motorRotor.Rotate(...); // Unity 메인 스레드가 아닐 수 있음
+}</code></pre>
+            <p>네트워크 수신 콜백은 Unity의 <code>Update()</code>와 다른 스레드에서 올 수 있습니다.</p>
+          </div>
+          <div class="card">
+            <h3>우리 코드의 해결</h3>
+            <pre><code>OnMqttMessageReceived()
+→ Queue에 메시지 저장
+
+Update()
+→ DrainMessages()
+→ ApplyMessage()
+→ Unity 오브젝트 변경</code></pre>
+            <p><code>ConveyorMqttSubscriber</code>는 Queue를 통해 Unity 메인 스레드에서만 화면을 바꿉니다.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide">
+        <p class="eyebrow">Day 1</p>
+        <h2>Unity와 Mock PLC로 눈에 보이는 흐름 만들기</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>시간</th>
+              <th>주제</th>
+              <th>실습</th>
+              <th>체크포인트</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>10:00-10:40</td>
+              <td>전체 아키텍처와 역할 분해</td>
+              <td>A/B 역할, 신호 흐름 그리기</td>
+              <td>신호 여행 경로 설명</td>
+            </tr>
+            <tr>
+              <td>10:40-12:00</td>
+              <td>Unity 씬 세팅</td>
+              <td>컨베이어, 센서, SpawnPoint, Dashboard 배치</td>
+              <td>Console 오류 없이 Play</td>
+            </tr>
+            <tr>
+              <td>13:00-14:40</td>
+              <td>Mock PLC 구현 이해</td>
+              <td>Start 버튼, 물체 낙하, X0/Y20 확인</td>
+              <td>Y20 ON 시 컨베이어/로터 동작</td>
+            </tr>
+            <tr>
+              <td>14:40-15:30</td>
+              <td>게이지와 색상 매핑</td>
+              <td>RPM, 온도, 진동, 전류 fill 연결</td>
+              <td>정상/경고/알람 색상 변화</td>
+            </tr>
+            <tr>
+              <td>15:30-17:00</td>
+              <td>오류 클리닉과 JSON Freeze</td>
+              <td>결측치, 음수 RPM, 연결 누락 진단</td>
+              <td>Checkpoint 1 저장</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="slide">
+        <p class="eyebrow">Day 2</p>
+        <h2>MQTT 파이프라인과 메시지 검증</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>시간</th>
+              <th>주제</th>
+              <th>실습</th>
+              <th>체크포인트</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>10:00-10:40</td>
+              <td>PLC Device Map</td>
+              <td>Y20/X0/D100-D130을 JSON 키와 매핑</td>
+              <td>Device Map 작성</td>
+            </tr>
+            <tr>
+              <td>10:40-12:00</td>
+              <td>Mosquitto와 MQTT Explorer</td>
+              <td>Broker 실행, topic 구독, 수동 publish</td>
+              <td>MQTT Explorer 수신 확인</td>
+            </tr>
+            <tr>
+              <td>13:00-14:40</td>
+              <td>Unity A Publisher</td>
+              <td><code>ConveyorMqttPublisher</code> 연결, publish 주기 조정</td>
+              <td>state/raw topic 발행</td>
+            </tr>
+            <tr>
+              <td>14:40-15:30</td>
+              <td>Unity B Subscriber</td>
+              <td><code>ConveyorMqttSubscriber</code>로 Queue 수신, ApplyMessage 확인</td>
+              <td>Scene B Dashboard 변화</td>
+            </tr>
+            <tr>
+              <td>15:30-17:00</td>
+              <td>통신 장애 주입</td>
+              <td>Broker 중지, topic 오타, raw/state 불일치</td>
+              <td>오류 원인 로그 작성</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="slide">
+        <p class="eyebrow">Day 3</p>
+        <h2>원격 미러링, 이상 시나리오, 발표</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>시간</th>
+              <th>주제</th>
+              <th>실습</th>
+              <th>체크포인트</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>10:00-10:40</td>
+              <td>Unity 메인 스레드와 Queue</td>
+              <td>수신 콜백에서 직접 Transform 변경 시도 후 Queue 방식 비교</td>
+              <td>스레드 오류 없이 수신</td>
+            </tr>
+            <tr>
+              <td>10:40-12:00</td>
+              <td>Scene A/B 동기화</td>
+              <td>A에서 Start, B에서 컨베이어/대시보드 미러링</td>
+              <td>지연 100ms 내 체감 동기화</td>
+            </tr>
+            <tr>
+              <td>13:00-14:40</td>
+              <td>정상/경고/알람 시나리오</td>
+              <td>온도 80도 이상, 진동 6 이상, 전류 7 이상 주입</td>
+              <td>색상, Text, 상태 메시지 변경</td>
+            </tr>
+            <tr>
+              <td>14:40-16:00</td>
+              <td>최종 Freeze</td>
+              <td>콜드 스타트 3회, 백업 JSON, 발표 캡처 확보</td>
+              <td>Checkpoint 3 제출</td>
+            </tr>
+            <tr>
+              <td>16:00-17:00</td>
+              <td>3분 시연과 회고</td>
+              <td>구조 1분, 시연 1분, 문제해결 1분</td>
+              <td>30일 적용 과제 작성</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="slide">
+        <p class="eyebrow">MQTT Explorer 실습</p>
+        <h2>Scene B만 켜고도 구독 테스트하기</h2>
+        <ol>
+          <li>Scene B를 Play한다.</li>
+          <li>Console에서 <code>Subscribed: factory/line1/conveyor/state</code>를 확인한다.</li>
+          <li>MQTT Explorer에서 같은 topic으로 JSON을 publish한다.</li>
+          <li>Console에서 <code>Message queued</code>, <code>Applied</code> 로그를 확인한다.</li>
+          <li>Dashboard의 Text와 Filled Image 색상 변화를 확인한다.</li>
+        </ol>
+        <pre><code>{
+  "state": {
+    "startButton": false,
+    "objectDetected": true,
+    "conveyorMotorOn": false
+  },
+  "measurements": {
+    "temperatureC": 20.0,
+    "vibrationMmS": 1.2,
+    "currentA": 3.1,
+    "rpm": 0
+  },
+  "status": {
+    "level": "idle",
+    "message": "Manual stop test"
+  },
+  "raw": {
+    "Y20": false,
+    "X0": true,
+    "D100": 200,
+    "D110": 12,
+    "D120": 31,
+    "D130": 0
+  }
+}</code></pre>
+      </section>
+
+      <section class="slide">
+        <p class="eyebrow">자주 나오는 질문</p>
+        <h2>교육생이 헷갈리는 지점 정리</h2>
+        <div class="grid-2">
+          <div class="card">
+            <h3>Y20은 출력인데 왜 Motor On인가?</h3>
+            <p>PLC 입장에서는 출력이고, Unity 입장에서는 “컨베이어 모터가 켜지라는 신호를 받았다”는 상태입니다.</p>
+            <pre><code>Y20 ON  → conveyorMotorOn = true
+Y20 OFF → conveyorMotorOn = false</code></pre>
+          </div>
+          <div class="card">
+            <h3>raw.Y20과 state 값이 다르면?</h3>
+            <p>교육용 구독자는 raw 값을 우선 적용하도록 보강했습니다. Console 경고를 보고 메시지 불일치를 찾습니다.</p>
+            <pre><code>state.conveyorMotorOn = true
+raw.Y20 = false
+→ raw.Y20 기준으로 정지</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide">
+        <p class="eyebrow">Fault Injection</p>
+        <h2>실패를 일부러 만들어 원인을 찾게 한다</h2>
+        <div class="grid-2">
+          <div class="card danger">
+            <h3>1. Unity 메인 스레드 위반</h3>
+            <p>MQTT 수신 콜백 안에서 직접 <code>transform.Rotate()</code>를 호출하게 해 보고, Queue가 필요한 이유를 설명합니다.</p>
+          </div>
+          <div class="card warn">
+            <h3>2. Broker 중단</h3>
+            <p>Mosquitto를 끄고, 마지막 값만 남는 위험과 stale 상태 표시의 필요성을 토론합니다.</p>
+          </div>
+          <div class="card warn">
+            <h3>3. Topic 오타</h3>
+            <p><code>factory/line1/conveyor/state</code>를 일부러 틀리게 보내고 구독 로그와 수신 로그를 비교합니다.</p>
+          </div>
+          <div class="card danger">
+            <h3>4. 값 불일치</h3>
+            <p><code>state.conveyorMotorOn</code>과 <code>raw.Y20</code>을 다르게 보내서 어떤 값이 우선되는지 확인합니다.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide">
+        <p class="eyebrow">복구 운영</p>
+        <h2>15분 이상 막히면 복구 패키지로 다음 단계에 태운다</h2>
+        <div class="grid-2">
+          <div class="card">
+            <h3>체크포인트</h3>
+            <ul>
+              <li>Checkpoint 1: Scene A Mock 흐름 완성</li>
+              <li>Checkpoint 2: MQTT Explorer 수동 publish/subscribe 성공</li>
+              <li>Checkpoint 3: Scene A → MQTT → Scene B 동기화 성공</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>복구 기준</h3>
+            <ul>
+              <li>Console 첫 오류를 기록한다.</li>
+              <li>Inspector 연결 누락을 확인한다.</li>
+              <li>Topic, Broker IP, Port를 확인한다.</li>
+              <li>미해결 시 완성 Scene 또는 sample JSON으로 진행한다.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="note">복구는 포기가 아니라 진도 이탈 방지 장치입니다. 원인 기록은 남기고 학습 흐름은 유지합니다.</div>
+      </section>
+
+      <section class="slide">
+        <p class="eyebrow">최종 시연</p>
+        <h2>3분 발표 템플릿</h2>
+        <div class="task-list">
+          <div class="task"><span class="num">1</span><span><strong>문제 30초:</strong> 실제 PLC가 없어도 디지털 트윈 신호 흐름을 재현해야 했다.</span></div>
+          <div class="task"><span class="num">2</span><span><strong>구조 60초:</strong> Scene A, Mock PLC, MQTT Broker, Scene B의 역할을 설명한다.</span></div>
+          <div class="task"><span class="num">3</span><span><strong>시연 60초:</strong> Start → 물체 낙하 → X0 → Y20 → MQTT → Scene B 대시보드 변화를 보여준다.</span></div>
+          <div class="task"><span class="num">4</span><span><strong>회고 30초:</strong> 가장 어려웠던 오류와 해결한 방법을 말한다.</span></div>
+        </div>
+      </section>
+
+      <section class="slide">
+        <p class="eyebrow">평가</p>
+        <h2>잘 만든 결과물의 기준</h2>
+        <div class="grid-2">
+          <div class="card">
+            <h3>기능 기준</h3>
+            <ul>
+              <li>Start 버튼으로 물체가 생성된다.</li>
+              <li>센서 감지 시 X0와 Y20 흐름을 설명할 수 있다.</li>
+              <li>Scene A가 MQTT 메시지를 발행한다.</li>
+              <li>Scene B가 메시지를 받아 컨베이어와 Dashboard를 바꾼다.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>이해 기준</h3>
+            <ul>
+              <li>명령, 센서 입력, 계측값을 구분한다.</li>
+              <li>raw 값과 state 값의 차이를 설명한다.</li>
+              <li>Queue 기반 수신이 필요한 이유를 설명한다.</li>
+              <li>Broker 장애와 stale 상태의 위험을 말할 수 있다.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide title-slide">
+        <div>
+          <p class="eyebrow">마무리</p>
+          <h1>디지털 트윈은 화면이 아니라 신호의 약속입니다.</h1>
+          <p class="lead">
+            오늘 만든 약속은 <code>Y20</code>, <code>X0</code>, <code>D100-D130</code>에서 시작해
+            MQTT JSON을 거쳐 Scene B의 움직임과 대시보드로 도착합니다.
+          </p>
+          <div class="chip-row">
+            <span class="chip">신호 추적</span>
+            <span class="chip">상태 모델</span>
+            <span class="chip">원격 미러링</span>
+            <span class="chip">오류 진단</span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="controls">
+      <button type="button" id="prev">이전</button>
+      <div class="progress" aria-label="진행률"><div class="bar" id="bar"></div></div>
+      <button type="button" id="next" class="primary">다음</button>
+      <div class="counter" id="counter">1 / 1</div>
+    </footer>
+  </div>
+
+  <script>
+    const slides = Array.from(document.querySelectorAll(".slide"));
+    const prev = document.getElementById("prev");
+    const next = document.getElementById("next");
+    const counter = document.getElementById("counter");
+    const bar = document.getElementById("bar");
+    let index = 0;
+
+    function showSlide(nextIndex) {
+      index = Math.max(0, Math.min(slides.length - 1, nextIndex));
+      slides.forEach((slide, i) => slide.classList.toggle("active", i === index));
+      counter.textContent = `${index + 1} / ${slides.length}`;
+      bar.style.width = `${((index + 1) / slides.length) * 100}%`;
+      prev.disabled = index === 0;
+      next.disabled = index === slides.length - 1;
+    }
+
+    prev.addEventListener("click", () => showSlide(index - 1));
+    next.addEventListener("click", () => showSlide(index + 1));
+
+    window.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowRight" || event.key === "PageDown" || event.key === " ") {
+        event.preventDefault();
+        showSlide(index + 1);
+      }
+
+      if (event.key === "ArrowLeft" || event.key === "PageUp") {
+        event.preventDefault();
+        showSlide(index - 1);
+      }
+    });
+
+    showSlide(0);
+  </script>
+</body>
+</html>

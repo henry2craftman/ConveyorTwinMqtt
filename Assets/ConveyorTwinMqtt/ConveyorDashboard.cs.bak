@@ -1,0 +1,115 @@
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
+
+namespace MPS
+{
+    /// <summary>
+    /// Unity A/B 공용 대시보드 바인딩.
+    /// TextMeshProUGUI와 Image fill을 Inspector에서 연결하면 MQTT/Mock 상태를 UI로 표시합니다.
+    /// </summary>
+    public class ConveyorDashboard : MonoBehaviour
+    {
+        [Header("상태 텍스트")]
+        public TMP_Text connectionText;
+        public TMP_Text statusText;
+        public TMP_Text motorText;
+        public TMP_Text objectText;
+        public TMP_Text rpmText;
+        public TMP_Text temperatureText;
+        public TMP_Text vibrationText;
+        public TMP_Text currentText;
+        public TMP_Text timestampText;
+        public TMP_Text jsonText;
+
+        [Header("상태 램프")]
+        public Image statusLamp;
+        public Image motorLamp;
+        public Image objectLamp;
+
+        [Header("게이지 Fill")]
+        public Image rpmFill;
+        public Image temperatureFill;
+        public Image vibrationFill;
+        public Image currentFill;
+
+        [Header("게이지 최대값")]
+        public float maxRpm = 1800f;
+        public float maxTemperatureC = 100f;
+        public float maxVibrationMmS = 8f;
+        public float maxCurrentA = 10f;
+
+        [Header("색상")]
+        public Color idleColor = new Color(0.45f, 0.50f, 0.55f);
+        public Color normalColor = new Color(0.10f, 0.62f, 0.45f);
+        public Color warningColor = new Color(0.95f, 0.62f, 0.12f);
+        public Color alarmColor = new Color(0.85f, 0.18f, 0.18f);
+
+        public void Apply(ConveyorTwinMessage message, bool mqttConnected)
+        {
+            if (message == null)
+                return;
+
+            ConveyorTwinState state = message.state ?? new ConveyorTwinState();
+            ConveyorTwinMeasurements measurements = message.measurements ?? new ConveyorTwinMeasurements();
+            ConveyorTwinStatus status = message.status ?? new ConveyorTwinStatus();
+
+            SetText(connectionText, mqttConnected ? "MQTT Connected" : "MQTT Disconnected");
+            SetText(statusText, $"{status.level} - {status.message}");
+            SetText(motorText, state.conveyorMotorOn ? "Conveyor Motor ON" : "Conveyor Motor OFF");
+            SetText(objectText, state.objectDetected ? "Object Detected" : "No Object");
+            SetText(rpmText, $"{measurements.rpm:0} RPM");
+            SetText(temperatureText, $"{measurements.temperatureC:0.0} °C");
+            SetText(vibrationText, $"{measurements.vibrationMmS:0.0} mm/s");
+            SetText(currentText, $"{measurements.currentA:0.0} A");
+            SetText(timestampText, message.timestamp);
+            SetText(jsonText, Newtonsoft.Json.JsonConvert.SerializeObject(message, Newtonsoft.Json.Formatting.Indented));
+
+            Color statusColor = GetStatusColor(status.level);
+            SetImageColor(statusLamp, statusColor);
+            SetImageColor(motorLamp, state.conveyorMotorOn ? normalColor : idleColor);
+            SetImageColor(objectLamp, state.objectDetected ? warningColor : idleColor);
+
+            SetFill(rpmFill, measurements.rpm, maxRpm, statusColor);
+            SetFill(temperatureFill, measurements.temperatureC, maxTemperatureC, statusColor);
+            SetFill(vibrationFill, measurements.vibrationMmS, maxVibrationMmS, statusColor);
+            SetFill(currentFill, measurements.currentA, maxCurrentA, statusColor);
+        }
+
+        Color GetStatusColor(string level)
+        {
+            switch ((level ?? string.Empty).ToLowerInvariant())
+            {
+                case "normal":
+                    return normalColor;
+                case "warning":
+                    return warningColor;
+                case "alarm":
+                    return alarmColor;
+                default:
+                    return idleColor;
+            }
+        }
+
+        static void SetText(TMP_Text target, string value)
+        {
+            if (target != null)
+                target.text = value;
+        }
+
+        static void SetImageColor(Image target, Color color)
+        {
+            if (target != null)
+                target.color = color;
+        }
+
+        static void SetFill(Image target, float value, float max, Color color)
+        {
+            if (target == null)
+                return;
+
+            target.fillAmount = max <= 0f ? 0f : Mathf.Clamp01(value / max);
+            target.color = color;
+        }
+    }
+}

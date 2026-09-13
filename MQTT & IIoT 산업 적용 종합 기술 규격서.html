@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MQTT & IIoT 산업 적용 엔지니어링 바이블</title>
+  <style>
+    :root {
+      --primary: #1d4ed8;
+      --primary-accent: #2563eb;
+      --primary-light: #eff6ff;
+      --surface: #ffffff;
+      --surface-subtle: #f8fafc;
+      --surface-card: #f1f5f9;
+      --border: #e2e8f0;
+      --border-dark: #cbd5e1;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --code-bg: #090d16;
+      --code-text: #e2e8f0;
+      --danger: #dc2626;
+      --warning: #d97706;
+      --success: #16a34a;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.68;
+      color: var(--text-main);
+      background-color: var(--surface-subtle);
+    }
+
+    header {
+      background: linear-gradient(135deg, #0b1329 0%, #1e293b 100%);
+      color: #ffffff;
+      padding: 56px 24px;
+      border-bottom: 4px solid var(--primary-accent);
+    }
+
+    .header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header h1 {
+      font-size: 2.5rem;
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+      font-weight: 800;
+    }
+
+    header p {
+      font-size: 1.15rem;
+      color: #94a3b8;
+      max-width: 900px;
+    }
+
+    .badge-bar {
+      display: flex;
+      gap: 10px;
+      margin-top: 18px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #cbd5e1;
+    }
+
+    .layout {
+      max-width: 1200px;
+      margin: 36px auto;
+      padding: 0 20px;
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 32px;
+    }
+
+    @media (max-width: 960px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+      .toc-sidebar {
+        display: none;
+      }
+    }
+
+    .toc-sidebar {
+      position: sticky;
+      top: 24px;
+      height: fit-content;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px;
+      font-size: 0.88rem;
+    }
+
+    .toc-sidebar h4 {
+      margin-bottom: 12px;
+      color: var(--text-main);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .toc-sidebar ol {
+      list-style-type: none;
+    }
+
+    .toc-sidebar li {
+      margin-bottom: 8px;
+    }
+
+    .toc-sidebar a {
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .toc-sidebar a:hover {
+      color: var(--primary-accent);
+      font-weight: 600;
+    }
+
+    .main-content {
+      min-width: 0;
+    }
+
+    section {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 36px;
+      margin-bottom: 32px;
+      border: 1px solid var(--border);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    }
+
+    h2 {
+      font-size: 1.6rem;
+      color: var(--text-main);
+      border-bottom: 2px solid var(--primary-light);
+      padding-bottom: 12px;
+      margin-bottom: 24px;
+      letter-spacing: -0.01em;
+    }
+
+    h3 {
+      font-size: 1.25rem;
+      color: #1e3a8a;
+      margin: 28px 0 12px 0;
+    }
+
+    h4 {
+      font-size: 1.02rem;
+      margin: 18px 0 8px 0;
+      color: var(--text-main);
+    }
+
+    p {
+      margin-bottom: 14px;
+      color: var(--text-muted);
+      font-size: 0.98rem;
+    }
+
+    ul, ol {
+      margin: 0 0 16px 22px;
+      color: var(--text-muted);
+    }
+
+    li {
+      margin-bottom: 6px;
+    }
+
+    strong {
+      color: var(--text-main);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin: 16px 0;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin: 16px 0;
+    }
+
+    .card {
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+    }
+
+    .card h4 {
+      margin-top: 0;
+      color: var(--primary-accent);
+      margin-bottom: 8px;
+    }
+
+    .card p {
+      margin-bottom: 0;
+      font-size: 0.9rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      font-size: 0.92rem;
+    }
+
+    th, td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    th {
+      background-color: var(--surface-card);
+      color: var(--text-main);
+      font-weight: 700;
+    }
+
+    tr:hover {
+      background-color: rgba(248, 250, 252, 0.8);
+    }
+
+    pre {
+      background-color: var(--code-bg);
+      color: var(--code-text);
+      padding: 18px 22px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.88rem;
+      line-height: 1.55;
+      margin: 16px 0 20px 0;
+      border: 1px solid #1e293b;
+    }
+
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.88em;
+      background: var(--surface-card);
+      color: #be123c;
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+    }
+
+    pre code {
+      background: transparent;
+      color: inherit;
+      padding: 0;
+      border: none;
+    }
+
+    .callout {
+      border-left: 4px solid var(--primary-accent);
+      background-color: var(--primary-light);
+      padding: 18px 20px;
+      border-radius: 0 8px 8px 0;
+      margin: 18px 0;
+    }
+
+    .callout-warning {
+      border-left-color: var(--warning);
+      background-color: #fffbeb;
+    }
+
+    .callout p:last-child {
+      margin-bottom: 0;
+    }
+
+    .ascii-box {
+      font-family: monospace;
+      background: #0b1120;
+      color: #38bdf8;
+      padding: 16px;
+      border-radius: 8px;
+      white-space: pre;
+      overflow-x: auto;
+      font-size: 0.85rem;
+      line-height: 1.4;
+      margin: 16px 0;
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 40px 20px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      background: var(--surface);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-inner">
+      <h1>MQTT & IIoT 산업 적용 종합 기술 규격서</h1>
+      <p>프로토콜 내부 메커니즘부터 제어망(OT) 레거시 연동, Sparkplug B, 고가용성 클러스터, 그리고 현장 교육 커리큘럼 설계까지의 A to Z</p>
+      <div class="badge-bar">
+        <span class="badge">OASIS / ISO/IEC 20922</span>
+        <span class="badge">MQTT v3.1.1 & v5.0</span>
+        <span class="badge">Sparkplug B (Eclipse Tahu)</span>
+        <span class="badge">OT / ISA-95 Architecture</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    
+    <nav class="toc-sidebar">
+      <h4>목차</h4>
+      <ol>
+        <li><a href="#section-1">1. 아키텍처 및 3대 디커플링</a></li>
+        <li><a href="#section-2">2. 패킷 구조 및 통신 제어 흐름</a></li>
+        <li><a href="#section-3">3. 계층형 토픽 및 와일드카드</a></li>
+        <li><a href="#section-4">4. QoS 동작 및 4-Way 핸드셰이크</a></li>
+        <li><a href="#section-5">5. 신뢰성 엔진 (LWT, Retained, PING)</a></li>
+        <li><a href="#section-6">6. MQTT v3.1.1 vs v5.0 심층 비교</a></li>
+        <li><a href="#section-7">7. IoT/웹 통신 프로토콜 정밀 비교</a></li>
+        <li><a href="#section-8">8. OT 레거시 연계 (Modbus/OPC UA)</a></li>
+        <li><a href="#section-9">9. 산업 표준 Sparkplug B 규격</a></li>
+        <li><a href="#section-10">10. 데이터 파이프라인 (TSDB/Kafka)</a></li>
+        <li><a href="#section-11">11. 고가용성(HA) 및 오프라인 캐싱</a></li>
+        <li><a href="#section-12">12. 산업 보안 (mTLS, ACL, ISA-95)</a></li>
+        <li><a href="#section-13">13. 실무 코드 및 Docker 스택</a></li>
+        <li><a href="#section-14">14. 현장 실무자 교육 로드맵</a></li>
+      </ol>
+    </nav>
+
+    <main class="main-content">
+
+      <!-- 1. 아키텍처 및 3대 디커플링 -->
+      <section id="section-1">
+        <h2>1. 아키텍처 및 3대 디커플링(Decoupling)</h2>
+        <p>
+          <strong>MQTT (Message Queuing Telemetry Transport)</strong>는 1999년 Andy Stanford-Clark(IBM)과 Arlen Nipper(Eurotech)가 사막 송유관 모니터링을 위해 위성 통신의 대역폭 한계와 높은 통신비용을 극복하고자 개발한 <strong>초경량 이벤트 드리븐 발행/구독(Pub/Sub) 프로토콜</strong>입니다.
+        </p>
+        <p>
+          클라이언트가 직접 통신하지 않고 중앙의 <strong>브로커(Broker)</strong>를 거침으로써 기존 클라이언트-서버(HTTP) 모델이 지닌 한계를 3가지 차원에서 완벽히 분리(Decoupling)합니다.
+        </p>
+
+        <div class="grid-3">
+          <div class="card">
+            <h4>공간적 분리 (Space)</h4>
+            <p>발행자와 구독자는 서로의 IP 주소, 포트 번호, 장비 식별자를 알 필요가 없습니다. 오직 메시지의 주소인 <strong>Topic</strong>만을 기준으로 통신합니다.</p>
+          </div>
+          <div class="card">
+            <h4>시간적 분리 (Time)</h4>
+            <p>메시지 발행 시점에 구독자가 오프라인(배터리 절전, 회선 단절 등) 상태여도 브로커의 세션 유지 기능을 통해 재접속 시 메시지를 수신받을 수 있습니다.</p>
+          </div>
+          <div class="card">
+            <h4>동기화 분리 (Sync)</h4>
+            <p>발행자는 메시지를 브로커로 넘기자마자 자신의 제어 루프로 복귀합니다. 구독자가 처리 중인지 기다리며 대기열이 블로킹되지 않는 비동기 구조입니다.</p>
+          </div>
+        </div>
+
+        <div class="ascii-box">
+[ Publisher ]                     [ Central Broker ]                    [ Subscribers ]
+(온도 센서 / PLC)                    (EMQX / Mosquitto)                (SCADA / TSDB / App)
+      |                                    |                                    |
+      |-- 1. CONNECT --------------------->|                                    |
+      |<-- 2. CONNACK ---------------------|                                    |
+      |                                    |<-- 3. SUBSCRIBE (Topic: plant/T1) -|
+      |                                    |--- 4. SUBACK --------------------->|
+      |                                    |                                    |
+      |-- 5. PUBLISH (plant/T1, "24.5C") ->|                                    |
+      |                                    |== 6. Topic Filter Routing ======== |
+      |                                    |--- 7. PUBLISH ("24.5C") ---------->|
+        </div>
+      </section>
+
+      <!-- 2. 패킷 구조 및 통신 제어 흐름 -->
+      <section id="section-2">
+        <h2>2. 패킷 구조 및 제어 흐름 (Packet Anatomy)</h2>
+        <p>
+          MQTT는 극소형 MCU 환경(8비트, 수 KB RAM)에서도 동작할 수 있도록 패킷 오버헤드를 극단적으로 줄였습니다. HTTP 요청 헤더가 최소 수백 바이트에서 수 KB에 달하는 반면, MQTT는 <strong>고정 헤더 2바이트</strong>만으로 동작 가능합니다.
+        </p>
+
+        <h3>패킷 기본 구조</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>영역 (Field)</th>
+              <th>길이 (Size)</th>
+              <th>포함 정보 및 역할</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Fixed Header (고정 헤더)</strong></td>
+              <td>2 ~ 5 Bytes</td>
+              <td>
+                • 패킷 타입 (1: CONNECT, 3: PUBLISH, 8: SUBSCRIBE 등 총 14~15개 제어 명령)<br>
+                • 플래그 (DUP, QoS 레벨, RETAIN 플래그)<br>
+                • 잔여 길이(Remaining Length, 가변 길이 인코딩으로 최대 256MB 표현)
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Variable Header (가변 헤더)</strong></td>
+              <td>가변 (0 ~ N Bytes)</td>
+              <td>
+                • 패킷 식별자 (Packet Identifier / Packet ID - QoS 1, 2 제어용)<br>
+                • 토픽 이름 (PUBLISH 패킷의 경우 문자열 길이 + 바이트열)<br>
+                • 프로토콜 버전, Keep Alive 시간 (CONNECT 시)
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Payload (페이로드)</strong></td>
+              <td>가변 (0 ~ 256MB)</td>
+              <td>
+                실제 전송할 애플리케이션 데이터. 바이너리, 순수 텍스트, 압축 포맷, JSON, Protobuf 등 어떤 포맷이든 원형 그대로 전송 가능 (Format Agnostic).
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>주요 제어 패킷 목록 (Control Packets)</h3>
+        <p>MQTT 연결 생애 주기 동안 교환되는 주요 패킷들입니다.</p>
+        <div class="grid-2">
+          <div class="card">
+            <h4>연결 수립 및 세션 유지</h4>
+            <ul>
+              <li><code>CONNECT</code> / <code>CONNACK</code>: 클라이언트 접속 요청 및 승인/에러 응답</li>
+              <li><code>PINGREQ</code> / <code>PINGRESP</code>: 하트비트 주기 점검 (TCP 연결 생존 확인)</li>
+              <li><code>DISCONNECT</code>: 클라이언트의 정상 접속 종료 (LWT 트리거 방지)</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h4>데이터 발행 및 구독 제어</h4>
+            <ul>
+              <li><code>PUBLISH</code>: 데이터 송신</li>
+              <li><code>PUBACK</code>, <code>PUBREC</code>, <code>PUBREL</code>, <code>PUBCOMP</code>: QoS 확인 응답</li>
+              <li><code>SUBSCRIBE</code> / <code>SUBACK</code>: 토픽 등록 및 승인</li>
+              <li><code>UNSUBSCRIBE</code> / <code>UNSUBACK</code>: 토픽 구독 해제</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. 계층형 토픽 및 와일드카드 -->
+      <section id="section-3">
+        <h2>3. 계층형 토픽(Topic) 구조 및 와일드카드 규칙</h2>
+        <p>
+          토픽은 슬래시(<code>/</code>)를 계층 구분자로 사용하는 대소문자 구분(Case-sensitive) UTF-8 문자열입니다. 브로커는 이 토픽 경로를 기반으로 트리 구조 인덱스를 생성하여 고속 라우팅을 수행합니다.
+        </p>
+
+        <h3>와일드카드 2종</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>구분</th>
+              <th>기호</th>
+              <th>작동 원리 및 제약 조건</th>
+              <th>매칭 예시</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>단일 레벨</strong></td>
+              <td><code>+</code></td>
+              <td>
+                계층 트리에서 <strong>정확히 단 하나의 계층</strong>만을 대체합니다. 중간 또는 끝 어느 위치든 올 수 있습니다.
+              </td>
+              <td>
+                <code>ulsan/plant1/+/motor/temperature</code><br>
+                &rarr; <code>ulsan/plant1/lineA/motor/temperature</code> (매칭)<br>
+                &rarr; <code>ulsan/plant1/lineB/motor/temperature</code> (매칭)<br>
+                &times; <code>ulsan/plant1/lineA/press/motor/temp</code> (불일치: 2계층 차이)
+              </td>
+            </tr>
+            <tr>
+              <td><strong>다중 레벨</strong></td>
+              <td><code>#</code></td>
+              <td>
+                지정된 위치 이후의 <strong>모든 하위 계층</strong>을 포괄합니다. 반드시 토픽의 <strong>맨 마지막</strong>에만 위치해야 합니다.
+              </td>
+              <td>
+                <code>ulsan/plant1/lineA/#</code><br>
+                &rarr; <code>ulsan/plant1/lineA/motor/rpm</code> (매칭)<br>
+                &rarr; <code>ulsan/plant1/lineA/sensor/press/vibration/status</code> (매칭)
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>시스템 토픽 (`$SYS/`)</h3>
+        <p>
+          대부분의 브로커는 <code>$SYS/</code>로 시작하는 특별한 시스템 토픽을 제공합니다. 일반 클라이언트는 이 토픽으로 발행할 수 없으며(Read-only), 브로커의 CPU 사용량, 연결된 총 클라이언트 수, 초당 인바운드/아웃바운드 메시지 수 등 내부 모니터링 메트릭을 발행합니다.
+        </p>
+        <ul>
+          <li><code>$SYS/broker/version</code>: 브로커 엔진 버전</li>
+          <li><code>$SYS/broker/clients/connected</code>: 현재 동시 접속 세션 수</li>
+          <li><code>$SYS/broker/messages/received</code>: 브로커가 수신한 누적 메시지 수</li>
+        </ul>
+
+        <div class="callout callout-warning">
+          <strong>산업 현장 토픽 설계 시 안티패턴(Anti-patterns):</strong>
+          <ul>
+            <li><strong>선두 슬래시 지양:</strong> <code>/factory/line1</code>처럼 앞에 슬래시를 넣으면 첫 번째 레벨이 빈 문자열(<code>""</code>)로 취급되어 트리에 불필요한 공백 노드가 생깁니다. 반드시 <code>factory/line1</code> 형식으로 작성하십시오.</li>
+            <li><strong>공백 문자 금지:</strong> 공백이나 특수기호(<code>*</code>, <code>?</code>, <code>공백</code>)는 스크립트 처리 및 디버깅 시 파싱 에러를 유발합니다.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 4. QoS 동작 및 4-Way 핸드셰이크 -->
+      <section id="section-4">
+        <h2>4. QoS(Quality of Service) 및 4-Way 핸드셰이크</h2>
+        <p>
+          MQTT는 네트워크의 전송 신뢰도와 대역폭 사용량 간의 타협점을 맞출 수 있도록 3단계의 QoS 수준을 제공합니다.
+        </p>
+
+        <div class="grid-3">
+          <div class="card">
+            <h4>QoS 0 : At most once</h4>
+            <p><strong>최대 1회 전송 (Fire and Forget)</strong><br>
+            확인 응답(ACK)이 없으며 TCP 연결이 끊기면 데이터는 영구 유실됩니다. 메시지 패킷 ID가 할당되지 않습니다.</p>
+            <p><em>용도: 100ms 단위의 지속적인 진동/온도 센서 스트리밍.</em></p>
+          </div>
+          <div class="card">
+            <h4>QoS 1 : At least once</h4>
+            <p><strong>최소 1회 전송 (ACK 보장)</strong><br>
+            수신 측에서 <code>PUBACK</code> 패킷을 회신할 때까지 송신 측이 메시지를 재전송합니다. 네트워크 지연 발생 시 중복 수신이 발생할 수 있습니다.</p>
+            <p><em>용도: 설비 가동/정지 상태 변경 이벤트, 알람.</em></p>
+          </div>
+          <div class="card">
+            <h4>QoS 2 : Exactly once</h4>
+            <p><strong>정확히 1회 전송 (중복 방지)</strong><br>
+            두 번의 왕복 교환(4-way 핸드셰이크)을 거쳐 수신 측에 중복 전송이나 유실 없이 정확히 한 번만 전달됩니다. 오버헤드가 가장 큽니다.</p>
+            <p><em>용도: PLC 긴급 비상정지 지시, 금융 거래, 제품 생산 카운팅.</em></p>
+          </div>
+        </div>
+
+        <h3>QoS 2 세부 패킷 핸드셰이크 흐름</h3>
+        <div class="ascii-box">
+  Sender (Client/Broker)                    Receiver (Broker/Client)
+            |                                           |
+     [Step 1] --- PUBLISH (Packet ID: 101, QoS 2) ----->| (메시지 임시 저장, ID 등록)
+            |                                           |
+     [Step 2] <-- PUBREC (Packet ID: 101) --------------| (수신 완료 응답 - "Publish Received")
+ (ID 락, 재전송 중지) |                                           |
+     [Step 3] --- PUBREL (Packet ID: 101) ------------->| (릴리즈 요청 - "Publish Release")
+            |                                           | (컨슈머에게 데이터 방출, ID 해제)
+     [Step 4] <-- PUBCOMP (Packet ID: 101) -------------| (완료 확인 - "Publish Complete")
+ (보관 중인 메시지 삭제)|                                           |
+        </div>
+      </section>
+
+      <!-- 5. 신뢰성 엔진 (LWT, Retained, PING) -->
+      <section id="section-5">
+        <h2>5. 통신 신뢰성 엔진: LWT, Retained, PING</h2>
+
+        <h3>1) 유언 메시지 (LWT, Last Will and Testament)</h3>
+        <p>
+          IoT 설비는 배터리 방전, 현장 케이블 단선, OS 크래시 등으로 인해 명시적인 종료 신호(<code>DISCONNECT</code>)를 보내지 못하고 전원이 꺼질 수 있습니다. LWT는 이러한 비정상 단절을 즉시 감지하는 장치입니다.
+        </p>
+        <ul>
+          <li><strong>등록:</strong> 클라이언트가 <code>CONNECT</code> 패킷을 브로커에 보낼 때 유언 토픽, 유언 내용(Payload), QoS, Retain 플래그를 미리 심어둡니다.</li>
+          <li><strong>트리거:</strong> 정상 <code>DISCONNECT</code> 수신 없이 TCP 연결이 강제로 끊어지면, 브로커가 등록된 유언 메시지를 해당 토픽으로 대신 발행합니다.</li>
+          <li><strong>실무 패턴:</strong> 접속 시 <code>factory/line1/status</code> 토픽에 <code>"ONLINE"</code>(Retained)을 발행하고, LWT에는 <code>"OFFLINE"</code>(Retained)을 설정합니다. 이렇게 하면 설비 장애 발생 즉시 모든 관제 시스템이 이상을 인지합니다.</li>
+        </ul>
+
+        <h3>2) 보관 메시지 (Retained Message)</h3>
+        <p>
+          일반적으로 브로커는 메시지를 구독자들에게 배달한 직후 즉시 메모리에서 제거합니다. 그러나 <code>RETAIN = 1</code> 플래그를 달아 메시지를 보내면, 브로커는 해당 토픽의 <strong>가장 최신 메시지 1개</strong>를 디스크 또는 메모리에 지속 보관합니다.
+        </p>
+        <ul>
+          <li>신규 구독자가 뒤늦게 해당 토픽을 <code>SUBSCRIBE</code>하는 순간, 다음 센서 데이터가 측정될 때까지 대기할 필요 없이 저장되어 있던 마지막 상태값을 즉각 전달받습니다.</li>
+          <li><strong>삭제 방법:</strong> 해당 토픽으로 페이로드가 빈 값(0 Byte, null)인 Retained 메시지를 1회 발행하면 브로커 캐시에서 완전히 소거됩니다.</li>
+        </ul>
+
+        <h3>3) Keep Alive 및 PING 매커니즘</h3>
+        <p>
+          TCP 프로토콜 자체의 Keep-Alive는 주기가 매우 길어 수 시간 동안 끊김을 인지하지 못할 수 있습니다. MQTT는 애플리케이션 계층에서 Keep Alive 타이머(초 단위)를 설정합니다.
+        </p>
+        <ul>
+          <li>클라이언트는 데이터 통신이 없더라도 약속된 시간(예: 60초) 내에 최소 1회 이상 패킷을 보내야 합니다. 보낼 데이터가 없다면 2바이트 크기의 <code>PINGREQ</code>를 발행합니다.</li>
+          <li>브로커는 <code>PINGRESP</code>로 회신합니다. 설정된 Keep Alive 시간의 1.5배(예: 90초) 동안 아무 패킷도 도달하지 않으면 브로커는 클라이언트가 사망한 것으로 간주하고 소켓을 강제 차단한 뒤 LWT를 실행합니다.</li>
+        </ul>
+      </section>
+
+      <!-- 6. MQTT v3.1.1 vs v5.0 심층 비교 -->
+      <section id="section-6">
+        <h2>6. MQTT v3.1.1 vs MQTT v5.0 심층 비교</h2>
+        <p>
+          2014년 제정된 v3.1.1이 단순 경량화에 초점을 맞췄다면, 2019년 발표된 <strong>MQTT v5.0</strong>은 클라우드 네이티브 환경 및 대규모 엔터프라이즈 IoT 인프라를 위한 강력한 부가 기능들을 대거 도입했습니다.
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>기능 및 항목</th>
+              <th>MQTT v3.1.1</th>
+              <th>MQTT v5.0</th>
+              <th>실무적 개선 효과</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>사용자 정의 속성<br>(User Properties)</strong></td>
+              <td>미지원</td>
+              <td><strong>지원 (Key-Value 배열)</strong></td>
+              <td>HTTP 헤더처럼 애플리케이션 메타데이터(타임스탬프, 라우팅 태그, 인증 토큰)를 페이로드 파싱 없이 패킷 헤더에서 즉시 추출 가능</td>
+            </tr>
+            <tr>
+              <td><strong>공유 구독<br>(Shared Subscriptions)</strong></td>
+              <td>표준 미지원<br>(브로커 커스텀 플러그인 의존)</td>
+              <td><strong>공식 표준 스펙화</strong><br><code>$share/{GroupID}/{Topic}</code></td>
+              <td>단일 토픽으로 초당 수만 건 들어오는 메시지를 여러 백엔드 워커 인스턴스들이 분산(Load Balancing) 처리 가능</td>
+            </tr>
+            <tr>
+              <td><strong>상세 에러 이유 코드<br>(Reason Codes)</strong></td>
+              <td>CONNACK에서만 제한적 응답 (6개 에러 코드)</td>
+              <td><strong>모든 ACK 패킷에서 지원</strong><br>(PUBACK, SUBACK, DISCONNECT 등)</td>
+              <td>권한 거부, 페이로드 규격 불일치, 할당량 초과 등 구체적 실패 사유를 클라이언트가 인지하여 정확한 디버깅 및 복구 가능</td>
+            </tr>
+            <tr>
+              <td><strong>토픽 별칭<br>(Topic Alias)</strong></td>
+              <td>미지원 (매 패킷마다 긴 문자열 전송)</td>
+              <td><strong>지원 (2바이트 정수로 축약)</strong></td>
+              <td><code>ulsan/line1/press/vibration/sensorA</code>와 같은 긴 토픽 문자열을 정수 ID(예: <code>1</code>)로 대체해 셀룰러/위성 대역폭 대폭 절감</td>
+            </tr>
+            <tr>
+              <td><strong>세션 만료 제어</strong></td>
+              <td><code>CleanSession = true/false</code><br>(영구 유지 또는 즉시 삭제)</td>
+              <td><code>CleanStart</code> +<br><code>Session Expiry Interval</code></td>
+              <td>클라이언트 단절 후 브로커가 세션(미수신 메시지 등)을 유지할 유효 기간을 초 단위로 정밀하게 설정 가능</td>
+            </tr>
+            <tr>
+              <td><strong>메시지 만료 시간<br>(Message Expiry)</strong></td>
+              <td>미지원 (무한 대기)</td>
+              <td><strong>지원 (Message Expiry Interval)</strong></td>
+              <td>네트워크가 복구되었을 때 쓸모없어진 오래된 과거 센서 데이터가 한꺼번에 쏟아져 시스템을 마비시키는 현상 방지</td>
+            </tr>
+            <tr>
+              <td><strong>요청/응답 패턴</strong></td>
+              <td>애플리케이션이 직접 Response 토픽 규약 구현</td>
+              <td><strong>Response Topic / Correlation Data</strong> 헤더 표준화</td>
+              <td>비동기 메시징 기반에서 RPC (원격 프로시저 호출) 및 마이크로서비스 간 동기형 요청-응답 구조 구현 용이</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- 7. IoT/웹 통신 프로토콜 정밀 비교 -->
+      <section id="section-7">
+        <h2>7. IoT 통신 프로토콜 종합 비교 매트릭스</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>특성 항목</th>
+              <th>MQTT (v5.0)</th>
+              <th>HTTP / REST (v1.1/2)</th>
+              <th>WebSocket</th>
+              <th>OPC UA</th>
+              <th>CoAP</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>전송 계층</strong></td>
+              <td>TCP / TLS</td>
+              <td>TCP / TLS</td>
+              <td>TCP (HTTP 업그레이드)</td>
+              <td>TCP / HTTPS / UADP</td>
+              <td><strong>UDP / DTLS</strong></td>
+            </tr>
+            <tr>
+              <td><strong>통신 패러다임</strong></td>
+              <td>발행/구독 (Pub/Sub)</td>
+              <td>요청-응답 (Req/Res)</td>
+              <td>전이중 양방향 (Full-Duplex)</td>
+              <td>클라이언트-서버 + Pub/Sub</td>
+              <td>요청-응답 + 비동기</td>
+            </tr>
+            <tr>
+              <td><strong>최소 헤더 크기</strong></td>
+              <td><strong>2 Bytes</strong></td>
+              <td>수백 Bytes ~ 수 KB</td>
+              <td>2 ~ 10 Bytes (핸드셰이크 제외)</td>
+              <td>수십 Bytes (복잡한 바이너리)</td>
+              <td><strong>4 Bytes</strong></td>
+            </tr>
+            <tr>
+              <td><strong>연결 형태</strong></td>
+              <td>상시 연결 (Stateful)</td>
+              <td>단발성 연결 (Stateless)</td>
+              <td>상시 연결 (Stateful)</td>
+              <td>상시 세션 (Heavy Stateful)</td>
+              <td>비연결 지향 (Connectionless)</td>
+            </tr>
+            <tr>
+              <td><strong>주요 목적</strong></td>
+              <td>대규모 IoT 수집 / 제어</td>
+              <td>일반 웹 서비스 / API 연동</td>
+              <td>브라우저 기반 실시간 웹소켓</td>
+              <td>공장 내 기계 간 상호운용성 표준</td>
+              <td>초저전력 슬립 모드 센서 네트워크</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- 8. OT 레거시 연계 (Modbus/OPC UA) -->
+      <section id="section-8">
+        <h2>8. OT 레거시 프로토콜 연계 (Bridge & Gateway)</h2>
+        <p>
+          제조 현장에는 이미 구축된 수천 대의 PLC와 CNC 머신이 존재하며, 대부분 인터넷 연결이나 MQTT를 직접 지원하지 않는 산업용 필드버스 프로토콜을 사용합니다. 따라서 <strong>엣지 게이트웨이(Edge Gateway)</strong>를 통해 이들을 수집하고 MQTT로 변환(Bridging)하는 파이프라인이 산업 적용의 제1관문입니다.
+        </p>
+
+        <div class="grid-2">
+          <div class="card">
+            <h4>Modbus RTU / TCP &rarr; MQTT</h4>
+            <ul>
+              <li><strong>특징:</strong> 16비트 레지스터(Holding, Input) 및 코일(Coil) 번지 기반의 데이터 맵. 단위나 메타데이터가 전혀 없음.</li>
+              <li><strong>변환 전략:</strong> 엣지 게이트웨이가 Modbus Master로서 수백 밀리초 주기로 슬레이브 PLC를 폴링한 뒤, 수집된 정수 값을 스케일링(예: <code>VAL / 10.0</code>)하여 엔지니어링 단위(℃, bar 등)가 포함된 JSON MQTT 메시지로 조립.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h4>OPC UA &rarr; MQTT</h4>
+            <ul>
+              <li><strong>특징:</strong> 복잡한 객체 지향 정보 모델, 태그 메타데이터, 내장 보안(암호화/전자서명)을 갖춘 현대 스마트 공장의 사실상 표준.</li>
+              <li><strong>변환 전략:</strong> 게이트웨이가 OPC UA Client로서 서버의 노드(Node ID) 변경 이벤트를 구독(Subscription & Monitored Items)하고, 변경 발생 시에만 MQTT로 압축 발행하는 <strong>Report-by-Exception</strong> 전략 수립.</li>
+            </ul>
+          </div>
+        </div>
+
+        <h3>엣지 컴퓨팅 전처리 아키텍처</h3>
+        <p>
+          공장 설비의 고주파 센서(진동 가속도계, 고전압 전류 센서)는 초당 1,000Hz ~ 20,000Hz의 데이터를 생산합니다. 이 원시(Raw) 데이터를 전부 MQTT 브로커로 전송하면 공장 내부 네트워크와 클라우드가 마비됩니다.
+        </p>
+        <div class="callout">
+          <strong>현장 필수 엣지 전처리 기법:</strong>
+          <ul>
+            <li><strong>Deadband (불감대) 필터링:</strong> 이전 측정값 대비 변화폭이 설정된 임계치(예: ±1.5%) 미만이면 발행을 생략하여 유휴 트래픽을 90% 이상 감축.</li>
+            <li><strong>엣지 통계 요약:</strong> 1초 동안 10,000번 수집한 센서 값에서 <code>RMS(실효값)</code>, <code>Peak-to-Peak</code>, <code>Kurtosis(첨도)</code>, <code>평균</code>만을 계산하여 1초에 1회 요약 패킷으로 발행.</li>
+            <li><strong>엣지 FFT(고속 푸리에 변환):</strong> 진동 데이터를 현장에서 즉시 주파수 스펙트럼으로 변환하여 베어링 결함 주파수 대역의 에너지만 MQTT로 전송.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 9. 산업 표준 Sparkplug B 규격 -->
+      <section id="section-9">
+        <h2>9. 산업용 표준 페이로드 규격: Sparkplug B</h2>
+        <p>
+          일반 MQTT의 치명적인 약점은 "페이로드 포맷의 자유로움"입니다. A사 설비는 <code>{"t": 25.1}</code>로, B사 설비는 <code>{"TEMP_VAL": "25.1 C"}</code>로 발행하면 전체 SCADA 시스템 통합 시 수백 개의 맞춤 파서를 짜야 합니다.
+          <strong>Sparkplug B (Eclipse Tahu)</strong>는 IIoT 환경에서 <strong>플러그 앤 플레이(Plug-and-Play)</strong> 상호운용성을 제공하기 위해 MQTT 위에 정립된 표준 프로토콜 규격입니다.
+        </p>
+
+        <h3>1) 엄격한 표준 토픽 네임스페이스</h3>
+        <p>Sparkplug B는 모든 토픽을 다음 5단계의 단일 구조로 고정합니다.</p>
+        <pre><code>spBv1.0 / {Group_ID} / {Message_Type} / {Edge_Node_ID} / [{Device_ID}]</code></pre>
+        <ul>
+          <li><code>spBv1.0</code>: 스파크플러그 버전 명시</li>
+          <li><code>Group_ID</code>: 공장 구역, 라인, 플랜트 이름 (예: <code>AssemblyLineA</code>)</li>
+          <li><code>Message_Type</code>: 노드 및 장비 상태 머신 메시지 유형 (12종)</li>
+          <li><code>Edge_Node_ID</code>: 물리 엣지 게이트웨이 또는 IPC 식별자 (예: <code>Gateway01</code>)</li>
+          <li><code>Device_ID</code>: (선택) 게이트웨이에 종속된 세부 센서/PLC ID (예: <code>PLC_Mitsubishi_FX5U</code>)</li>
+        </ul>
+
+        <h3>2) 노드 생애 주기 제어 (State Machine Messages)</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>메시지 타입</th>
+              <th>명칭 및 시점</th>
+              <th>내용 및 역할</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>NBIRTH</code></td>
+              <td>Node Birth (노드 탄생)</td>
+              <td>엣지 노드가 브로커에 접속 완료된 즉시 발행. 노드가 보유한 모든 태그 목록, 데이터 타입, 초기값을 선언 (Birth Certificate).</td>
+            </tr>
+            <tr>
+              <td><code>DBIRTH</code></td>
+              <td>Device Birth (장비 탄생)</td>
+              <td>노드에 연결된 하위 장비(PLC 등)가 활성화될 때 장비의 태그 메타데이터와 초기값을 공표.</td>
+            </tr>
+            <tr>
+              <td><code>NDATA</code> / <code>DDATA</code></td>
+              <td>Data (데이터 변경 보고)</td>
+              <td>값이 변경된 태그만 선별하여 전송 (Report-by-Exception). 태그 이름 대신 압축된 <code>Alias(정수 ID)</code>를 사용하여 패킷 크기 극소화.</td>
+            </tr>
+            <tr>
+              <td><code>NCMD</code> / <code>DCMD</code></td>
+              <td>Command (제어 명령)</td>
+              <td>상위 SCADA/MES가 현장 엣지 노드 또는 장비에 파라미터 변경, 리부팅, 태그 재선언(Rebirth) 등을 지시.</td>
+            </tr>
+            <tr>
+              <td><code>NDEATH</code> / <code>DDEATH</code></td>
+              <td>Death (노드 사망)</td>
+              <td>브로커의 <strong>LWT</strong> 메커니즘과 연동되어 엣지 노드가 비정상 통신 단절될 때 브로커가 즉각 대행 발행.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>3) Google Protocol Buffers (Protobuf) 인코딩</h3>
+        <p>
+          Sparkplug B는 텍스트 기반 JSON을 쓰지 않고 구글의 <strong>Protobuf 이진 직렬화</strong>를 강제합니다. 동일한 100개의 공정 태그를 전송할 때 JSON 대비 데이터 페이로드 크기를 80~90% 이상 절감하며, 스키마 기반 타입 검증을 보장합니다.
+        </p>
+      </section>
+
+      <!-- 10. 데이터 파이프라인 (TSDB/Kafka) -->
+      <section id="section-10">
+        <h2>10. 엔터프라이즈 데이터 파이프라인 아키텍처</h2>
+        <p>
+          MQTT 브로커는 **데이터를 중계(Transit)하는 엔진**이지, 수백 테라바이트를 저장하고 분석하는 데이터베이스가 아닙니다. 산업 환경에서는 브로커 후단에 데이터 엔지니어링 파이프라인을 구축해야 합니다.
+        </p>
+
+        <div class="ascii-box">
+[ Field OT Tier ]         [ Edge / Gateway ]            [ Broker Tier ]            [ Enterprise Data Tier ]
++---------------+         +----------------+          +------------------+         +-----------------------+
+| Motors, PLCs  | --Modbus-> Node-RED /     | --MQTT-> | EMQX / HiveMQ    | =====> | InfluxDB / Timescale  |
+| Robots, CNCs  | --OPC UA-> ThingsBoard    |  (TLS)   | (Broker Cluster) | (Sink) | (시계열 센서 데이터 보관)|
++---------------+         +----------------+          +--------+---------+         +-----------+-----------+
+                                                               |                               |
+                                                               | (Rule Engine)                 v
+                                                               +====> Apache Kafka ====> [ Grafana 관제 대시보드 ]
+                                                                       (대용량 버퍼)      [ MES / AI 이상감지 서빙 ]
+        </div>
+
+        <h3>파이프라인 구축 패턴 3선</h3>
+        <ul>
+          <li><strong>패턴 A: 브로커 내장 Rule Engine 직접 싱크 (EMQX 등):</strong> 추가 브릿지 서버 없이 브로커 자체 SQL 엔진(<code>SELECT payload.temp FROM "factory/+" WHERE payload.temp > 80</code>)을 이용해 InfluxDB, PostgreSQL 등으로 밀리초 단위 직접 저장.</li>
+          <li><strong>패턴 B: Telegraf MQTT Consumer 데몬 활용:</strong> 오픈소스 에이전트인 Telegraf가 MQTT 브로커를 상시 구독하여 데이터를 파싱/배칭(Batching)한 뒤 InfluxDB에 초당 수천 건 단위로 벌크 인서트.</li>
+          <li><strong>패턴 C: Kafka 브릿지를 통한 빅데이터 연계:</strong> 공장 수십 곳의 데이터가 초당 수십만 건 이상 몰릴 때, MQTT 브로커 뒷단에 Kafka 클러스터를 두어 배압(Backpressure)을 흡수하고, Flink/Spark 스트리밍 엔진으로 실시간 머신러닝 이상 탐지 수행.</li>
+        </ul>
+      </section>
+
+      <!-- 11. 고가용성(HA) 및 오프라인 캐싱 -->
+      <section id="section-11">
+        <h2>11. 고가용성(HA) 클러스터링 및 오프라인 복원력</h2>
+
+        <h3>브로커 클러스터링 및 무중단 이중화</h3>
+        <p>
+          단일 브로커(Single Point of Failure) 장애 시 공장 전체 라인이 멈출 수 있습니다. 엔터프라이즈 환경에서는 3대 이상의 브로커 노드를 클러스터링합니다.
+        </p>
+        <ul>
+          <li><strong>분산 세션 및 라우팅 테이블 동기화:</strong> EMQX(Mnesia/Ekka 라이브러리 기반), HiveMQ 등의 브로커는 노드 간 분산 라우팅 트리를 공유합니다. 어떤 브로커 노드에 접속하든 다른 노드에 접속한 구독자에게 즉각 메시지가 라우팅됩니다.</li>
+          <li><strong>L4 로드 밸런싱 (HAProxy / NGINX):</strong> 클라이언트 전면에 로드 밸런서를 배치하고 <strong>Proxy Protocol v2</strong>를 활성화하여 로드 밸런서 뒷단에서도 클라이언트의 실제 원본 IP를 추적할 수 있도록 구성합니다.</li>
+        </ul>
+
+        <h3>로컬 버퍼링: Store-and-Forward (오프라인 캐싱)</h3>
+        <p>
+          공장과 클라우드 데이터센터 간의 외부 인터넷망(WAN)은 번개, 지중 케이블 단선, ISP 장애 등으로 언제든 단절될 수 있습니다. 
+        </p>
+        <div class="callout">
+          <strong>Store-and-Forward 동작 프로세스:</strong>
+          <ol>
+            <li>공장 현장 내부에 <strong>엣지 브로커(또는 엣지 게이트웨이 캐시 엔진)</strong>를 설치합니다.</li>
+            <li>설비들은 외부 클라우드가 아닌 내부 엣지 브로커로 데이터를 초당 전송합니다 (정상 통신 지속).</li>
+            <li>엣지 브로커는 클라우드 상위 브로커로 <strong>MQTT 브릿지(Bridge)</strong> 연결을 유지합니다.</li>
+            <li>외부 WAN망이 차단되면, 브릿지 연결 실패를 감지하고 수집되는 모든 시계열 데이터를 <strong>로컬 NVMe/SSD SQLite/RocksDB 버퍼</strong>에 FIFO 순서로 압축 저장(Store)합니다.</li>
+            <li>인터넷망이 복구되면 상위 브로커와 핸드셰이크 후, 적체된 데이터를 타임스탬프 순서대로 순차 전송(Forward)하여 <strong>데이터 영구 결손(Gap)을 방지</strong>합니다.</li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- 12. 산업 보안 (mTLS, ACL, ISA-95) -->
+      <section id="section-12">
+        <h2>12. OT 사이버 보안: mTLS, ACL, ISA-95 준수</h2>
+
+        <h3>1) 전송 계층 암호화 및 mTLS (상호 인증)</h3>
+        <p>
+          공장 네트워크에서는 단순 ID/PW 방식은 탈취 위험이 큽니다. 반드시 <strong>mTLS (mutual TLS, 양방향 인증)</strong>를 적용해야 합니다.
+        </p>
+        <ul>
+          <li><strong>포트 분리:</strong> 기본 평문 <code>1883</code> 포트는 전면 폐쇄하고, TLS 적용 포트 <code>8883</code> 및 WSS(보안 웹소켓) <code>8084</code>만 개방합니다.</li>
+          <li><strong>클라이언트 인증서:</strong> 브로커만 인증서를 가지는 일반 HTTPS와 달리, 모든 PLC와 게이트웨이 기기마다 자체 사설 CA(Certificate Authority)에서 서명 발급한 개별 X.509 클라이언트 인증서와 개인키를 설치하여 하드웨어 단위로 신원을 확인합니다.</li>
+        </ul>
+
+        <h3>2) 세분화된 토픽 기반 ACL (Access Control List)</h3>
+        <p>
+          인증을 통과했더라도 모든 토픽에 접근해서는 안 됩니다. 최소 권한 원칙(Principle of Least Privilege)에 따라 읽기(Sub)와 쓰기(Pub) 권한을 엄격히 통제합니다.
+        </p>
+        <pre><code># ACL 정책 설정 예시 (Mosquitto/EMQX 규격)
+# 라인1 로봇 제어 컨트롤러: 제어 명령 수신만 가능, 센서 데이터 발행만 가능
+user robot_arm_controller_01
+topic read factory/line1/robot/command
+topic write factory/line1/robot/telemetry
+
+# 관제실 관리자 계정: 전체 라인 모니터링 구독 가능, 긴급 제어 명령 발행 가능
+user supervisory_admin
+topic read factory/#
+topic write factory/+/+/emergency_stop
+
+# 게스트/분석 시스템: 모든 텔레메트리 읽기만 가능 (제어 토픽 쓰기 절대 차단)
+user data_scientist
+topic read factory/+/+/telemetry</code></pre>
+
+        <h3>3) ISA-95 / Purdue 모델(제어망 5계층)과의 통합</h3>
+        <p>
+          보안 상 공장 내부 제어망(Level 0~2: 센서/PLC)은 인터넷(외부 클라우드, Level 4~5)과 직접 소통할 수 없습니다. 
+          따라서 <strong>산업용 비무장지대(IDMZ, Industrial DMZ - Level 3.5)</strong>에 MQTT 브로커를 배치하고, 외부망 및 내부망과의 트래픽을 단방향 방화벽으로 철저히 분리 통제해야 합니다.
+        </p>
+      </section>
+
+      <!-- 13. 실무 코드 및 Docker 스택 -->
+      <section id="section-13">
+        <h2>13. 실무 코드 및 통합 Docker 스택 레시피</h2>
+
+        <h3>1) 엔터프라이즈 모니터링 스택 (docker-compose.yml)</h3>
+        <p>Mosquitto 브로커, InfluxDB(시계열 DB), Grafana(관제 대시보드)를 단번에 구동하는 스택 정의입니다.</p>
+        <pre><code>version: '3.8'
+
+services:
+  mqtt-broker:
+    image: eclipse-mosquitto:2.0
+    container_name: mqtt-broker
+    restart: always
+    ports:
+      - "1883:1883"
+      - "8883:8883"
+    volumes:
+      - ./mosquitto/config:/mosquitto/config
+      - ./mosquitto/data:/mosquitto/data
+      - ./mosquitto/log:/mosquitto/log
+
+  influxdb:
+    image: influxdb:2.7
+    container_name: influxdb
+    restart: always
+    ports:
+      - "8086:8086"
+    volumes:
+      - ./influxdb/data:/var/lib/influxdb2
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=admin
+      - DOCKER_INFLUXDB_INIT_PASSWORD=password1234!
+      - DOCKER_INFLUXDB_INIT_ORG=smartfactory
+      - DOCKER_INFLUXDB_INIT_BUCKET=sensor_bucket
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - influxdb
+    volumes:
+      - ./grafana/data:/var/lib/grafana</code></pre>
+
+        <h3>2) Python 3 기반 산업용 Publisher (paho-mqtt v2, MQTT v5 규격)</h3>
+        <p>LWT 설정, User Properties 주입, QoS 1 안정 전송이 구현된 실무형 센서 시뮬레이터 예제입니다.</p>
+        <pre><code>import time
+import json
+import random
+from paho.mqtt import client as mqtt_client
+from paho.mqtt.enums import MQTTProtocolVersion
+from paho.mqtt.properties import Properties
+from paho.mqtt.packettypes import PacketTypes
+
+BROKER = "localhost"
+PORT = 1883
+CLIENT_ID = "edge-gateway-line1"
+STATUS_TOPIC = "factory/line1/status"
+DATA_TOPIC = "factory/line1/press/telemetry"
+
+def on_connect(client, userdata, flags, rc, properties=None):
+    if rc == 0:
+        print("[Connected] 브로커 접속 성공")
+        # 온라인 상태 알림 (Retained = True)
+        client.publish(STATUS_TOPIC, payload="ONLINE", qos=1, retain=True)
+    else:
+        print(f"[Failed] 접속 실패 에러 코드: {rc}")
+
+# 1. 클라이언트 인스턴스 생성 (MQTT v5 지정)
+client = mqtt_client.Client(
+    callback_api_version=mqtt_client.CallbackAPIVersion.VERSION2,
+    client_id=CLIENT_ID,
+    protocol=MQTTProtocolVersion.MQTTv5
+)
+client.on_connect = on_connect
+
+# 2. 비정상 단절 대비 LWT (유언 메시지) 등록
+client.will_set(topic=STATUS_TOPIC, payload="OFFLINE_ABNORMAL", qos=1, retain=True)
+
+# 3. 브로커 연결
+client.connect(BROKER, PORT, keepalive=30)
+client.loop_start()
+
+try:
+    while True:
+        # 센서 데이터 수집 모사
+        sensor_data = {
+            "pressure_bar": round(random.uniform(4.5, 6.2), 2),
+            "oil_temp_c": round(random.uniform(55.0, 78.5), 1),
+            "cycle_count": 1042
+        }
+        
+        # MQTT v5 User Properties (메타데이터 주입)
+        props = Properties(PacketTypes.PUBLISH)
+        props.UserProperty = [("site", "ulsan"), ("sensor_vendor", "siemens")]
+
+        # QoS 1 전송
+        client.publish(
+            DATA_TOPIC,
+            payload=json.dumps(sensor_data),
+            qos=1,
+            properties=props
+        )
+        print(f"[Published] 데이터 송신: {sensor_data}")
+        time.sleep(1)
+
+except KeyboardInterrupt:
+    print("[Shutdown] 정상 종료 시퀀스 실행")
+    # 정상 종료 시 OFFLINE 상태로 명시 변경 후 정상 disconnect
+    client.publish(STATUS_TOPIC, payload="OFFLINE_NORMAL", qos=1, retain=True)
+    client.disconnect()
+    client.loop_stop()</code></pre>
+      </section>
+
+      <!-- 14. 현장 실무자 교육 로드맵 -->
+      <section id="section-14">
+        <h2>14. 산업 적용 교육생 실무 훈련 커리큘럼 (5단계 로드맵)</h2>
+        <p>
+          단순 문법 학습에 그치지 않고, 교육생이 실제 제조/플랜트 현장에 투입되어 통신망을 구축하고 트러블슈팅할 수 있도록 구성한 <strong>현업 중심 실무 훈련 체계</strong>입니다.
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>모듈</th>
+              <th>주요 학습 내용</th>
+              <th>실습 과제 및 검증 기준</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Level 1<br>프로토콜 기초</strong></td>
+              <td>
+                • MQTT 기본 철학 및 Pub/Sub 메커니즘<br>
+                • Wireshark 패킷 분석 (CONNECT, PING, QoS 핸드셰이크)<br>
+                • 계층형 토픽 네임스페이스 수립 및 와일드카드 실습
+              </td>
+              <td>Wireshark로 QoS 0, 1, 2 패킷을 직접 캡처하고 왕복 단계별 패킷 차이점을 설명서로 제출</td>
+            </tr>
+            <tr>
+              <td><strong>Level 2<br>OT 게이트웨이 연동</strong></td>
+              <td>
+                • Modbus RTU/TCP 레지스터 맵 독해 및 데이터 폴링<br>
+                • Node-RED를 활용한 Modbus-to-MQTT 프로토콜 변환<br>
+                • 데드밴드(Deadband) 및 엣지 연산 전처리 로직 구현
+              </td>
+              <td>가상 Modbus PLC 시뮬레이터의 온도/압력 레지스터를 읽어 정규화된 JSON MQTT로 변환 전송</td>
+            </tr>
+            <tr>
+              <td><strong>Level 3<br>스마트 공장 표준화</strong></td>
+              <td>
+                • Sparkplug B 아키텍처 및 Protobuf 직렬화<br>
+                • NBIRTH, NDATA, NDEATH 상태 머신 생애주기 코딩<br>
+                • 토픽 앨리어스(Topic Alias) 및 페이로드 압축 기법
+              </td>
+              <td>Sparkplug B 라이브러리를 통해 엣지 노드가 단절되었을 때 SCADA 관제에 NDEATH가 뜨도록 구현</td>
+            </tr>
+            <tr>
+              <td><strong>Level 4<br>엔터프라이즈 파이프라인</strong></td>
+              <td>
+                • InfluxDB 시계열 데이터베이스 스키마 설계<br>
+                • Telegraf / EMQX Rule Engine 데이터 싱크 파이프라인<br>
+                • Grafana 기반 실시간 제조 라인 이상 모니터링 패널 제작
+              </td>
+              <td>초당 100건 이상의 센서 데이터를 유실 없이 InfluxDB에 적재하고 Grafana 알람(Alert) 구축</td>
+            </tr>
+            <tr>
+              <td><strong>Level 5<br>엔터프라이즈 보안 및 장애 대응</strong></td>
+              <td>
+                • OpenSSL 사설 CA 구축 및 mTLS 클라이언트 인증서 발급<br>
+                • 라인별 제어 토픽 쓰기 방지 ACL 정책 구성<br>
+                • 네트워크 단절 모사(Store-and-Forward 로컬 캐싱 복구)
+              </td>
+              <td>비인가 장비 차단 테스트 통과 및 랜선을 물리적으로 뽑았다 꽂았을 때 과거 데이터 무손실 복구 시연</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+    </main>
+  </div>
+
+  <footer>
+    <p>MQTT & IIoT Industrial Architecture Technical Guide &copy; 2026. Designed for Smart Factory Engineering.</p>
+  </footer>
+
+</body>
+</html>
