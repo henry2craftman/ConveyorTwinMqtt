@@ -25,7 +25,6 @@ namespace MPS
         public Transform objectSpawnPoint;
         public GameObject fallingObjectPrefab;
         public Transform fallbackSpawnParent;
-        public Transform motorRotor;
         public ConveyorDashboard dashboard;
         public ConveyorMqttPublisher mqttPublisher;
 
@@ -70,7 +69,6 @@ namespace MPS
             RunMockPlcLogic();
             ApplyToUnityObjects();
             UpdateMeasurements();
-            RotateMotorVisual();
             BuildCurrentMessage();
 
             if (dashboard != null)
@@ -139,11 +137,11 @@ namespace MPS
             if (fallbackSpawnParent != null)
                 _lastSpawnedObject.transform.SetParent(fallbackSpawnParent);
 
-            if (_lastSpawnedObject.GetComponent<Rigidbody>() == null)
-                _lastSpawnedObject.AddComponent<Rigidbody>();
+            // if (_lastSpawnedObject.GetComponent<Rigidbody>() == null)
+            //     _lastSpawnedObject.AddComponent<Rigidbody>();
 
-            if (_lastSpawnedObject.GetComponent<Collider>() == null)
-                _lastSpawnedObject.AddComponent<BoxCollider>();
+            // if (_lastSpawnedObject.GetComponent<Collider>() == null)
+            //     _lastSpawnedObject.AddComponent<BoxCollider>();
 
             if (destroyFallingObjectAfterSeconds)
                 Destroy(_lastSpawnedObject, fallingObjectLifetime);
@@ -185,16 +183,6 @@ namespace MPS
             vibrationMmS = Mathf.Lerp(vibrationMmS, targetVibration, t);
         }
 
-        void RotateMotorVisual()
-        {
-            if (motorRotor == null)
-                return;
-
-            if (rotateMotorOnlyWhenMotorOn && !y20ConveyorMotorOn)
-                return;
-
-            motorRotor.Rotate(motorRotationAxis.normalized, -rpm * motorRotationScale * Time.deltaTime, Space.Self);
-        }
 
         void BuildCurrentMessage()
         {
@@ -202,7 +190,7 @@ namespace MPS
             CurrentMessage.lineId = "line1";
             CurrentMessage.source = "unity-a-mock";
             CurrentMessage.mode = "mock";
-            CurrentMessage.timestamp = ConveyorTwinMessage.NowIso();
+            CurrentMessage.timestamp = NowShortTimestamp();
             CurrentMessage.connected = true;
 
             CurrentMessage.state.startButton = startButton;
@@ -263,6 +251,11 @@ namespace MPS
         static float Round1(float value)
         {
             return Mathf.Round(value * 10f) / 10f;
+        }
+
+        static string NowShortTimestamp()
+        {
+            return System.DateTimeOffset.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
         }
     }
 }
